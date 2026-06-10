@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+title: "vex: A readable, visualizable vector database in Rust"
+abstract: >
+  Vex is an educational, performance-oriented vector database implemented
+  from primitives in Rust. It provides clean implementations of brute-force
+  and HNSW nearest-neighbor search, honest benchmarks against production
+  vector databases, and a companion interactive web visualizer that lets
+  users watch HNSW graph construction and animated query traversal in
+  real time.
+authors:
+  - family-names: Mishra
+    given-names: Manav
+    affiliation: Vellore Institute of Technology
+    email: manavmishra260205@gmail.com
+repository-code: "https://github.com/manavmishra-cloud/vex"
+keywords:
+  - vector-database
+  - HNSW
+  - approximate-nearest-neighbor
+  - embeddings
+  - rust
+  - similarity-search
+  - educational-software
+license: MIT
