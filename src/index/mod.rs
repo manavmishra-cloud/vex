@@ -8,6 +8,7 @@
 //! The Hierarchical Navigable Small World (HNSW) index lands in v0.2.
 
 pub mod flat;
+pub mod hnsw;
 
 use crate::error::Result;
 

@@ -43,4 +43,8 @@ pub mod index;
 
 pub use distance::Distance;
 pub use error::{Result, VexError};
-pub use index::{flat::FlatIndex, Index, SearchResult};
+pub use index::{
+    flat::FlatIndex,
+    hnsw::{HnswIndex, HnswParams},
+    Index, SearchResult,
+};
