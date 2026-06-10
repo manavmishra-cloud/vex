@@ -22,6 +22,8 @@
 //! assert_eq!(hits[0].id, 0);
 //! ```
 
+use serde::{Deserialize, Serialize};
+
 use super::{Index, SearchResult};
 use crate::distance::Distance;
 use crate::error::{Result, VexError};
@@ -30,7 +32,7 @@ use crate::error::{Result, VexError};
 ///
 /// All vectors are stored interleaved in a single `Vec<f32>` of length
 /// `n * dim`. Vector `i` occupies the slice `[i*dim .. (i+1)*dim]`.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FlatIndex {
     dim: usize,
     metric: Distance,

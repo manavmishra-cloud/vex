@@ -34,6 +34,7 @@ use std::collections::{BinaryHeap, HashSet};
 
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
+use serde::{Deserialize, Serialize};
 
 use super::{Index, SearchResult};
 use crate::distance::Distance;
@@ -44,7 +45,7 @@ use crate::error::{Result, VexError};
 /// The defaults are taken from the parameter values recommended by
 /// Malkov & Yashunin (2018) and reproduce roughly Qdrant-class quality
 /// on the typical 100-1M point regime.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct HnswParams {
     /// Number of bidirectional links per node on each layer above 0.
     /// Larger `m` => denser graph, slower construction, better recall.
@@ -105,7 +106,7 @@ impl Ord for Candidate {
 /// Internally stores all vectors in a flat `Vec<f32>` of length `n*dim`
 /// and maintains a per-node, per-layer adjacency list as nested `Vec`s.
 /// Node IDs are dense `0..n` in insertion order.
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct HnswIndex {
     dim: usize,
     metric: Distance,
@@ -125,7 +126,13 @@ pub struct HnswIndex {
     entry_point: Option<u64>,
     /// Highest layer present in the index.
     max_level: u8,
+    /// RNG state is reseeded from `params.seed` on deserialize.
+    #[serde(skip, default = "default_rng")]
     rng: StdRng,
+}
+
+fn default_rng() -> StdRng {
+    StdRng::seed_from_u64(0)
 }
 
 impl HnswIndex {

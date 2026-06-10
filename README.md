@@ -49,9 +49,9 @@ assert_eq!(hits[0].id, 0);
 | Version | Scope | Status |
 |---------|-------|--------|
 | **v0.1** | Flat brute-force index, 3 distance metrics, tests | ✅ released |
-| **v0.2** | HNSW index from scratch (hierarchical layers, M-construction, query traversal) | 🚧 next |
-| **v0.3** | HTTP REST API (axum), file persistence | planned |
-| **v0.4** | Benchmark suite vs Qdrant and FAISS — recall@10/100, p50/p99 latency | planned |
+| **v0.2** | HNSW index from scratch (hierarchical layers, M-construction, query traversal) | ✅ released |
+| **v0.3** | HTTP REST API (axum), bincode-based file persistence | ✅ released |
+| **v0.4** | Benchmark suite vs Qdrant and FAISS — recall@10/100, p50/p99 latency | 🚧 next |
 | **v0.5** | **Interactive web visualizer**: animated HNSW construction + query traversal | planned |
 | **v0.6** | Hand-written SIMD distance kernels, scalar + product quantization | planned |
 | **v0.7** | Concurrent writes, light sharding | exploratory |
@@ -82,12 +82,67 @@ cargo build --release
 # Tests
 cargo test
 
-# Example: 10k vectors, 100 random queries
-cargo run --release --example basic
+# Examples
+cargo run --release --example basic           # 10k vectors timing
+cargo run --release --example hnsw_vs_flat    # head-to-head comparison
+
+# HTTP server
+cargo run --release --bin vex-server -- --bind 127.0.0.1:8080
 
 # Criterion benchmarks (saves HTML report to target/criterion/)
 cargo bench
 ```
+
+## HTTP API
+
+Start the server with `cargo run --release --bin vex-server` (default bind
+is `127.0.0.1:8080`). All payloads are JSON.
+
+### Create a collection
+
+```bash
+curl -X POST http://127.0.0.1:8080/collections -H 'Content-Type: application/json' -d '{
+  "name": "my-vectors",
+  "dim": 128,
+  "metric": "Cosine",
+  "index": "hnsw"
+}'
+```
+
+### Insert vectors
+
+```bash
+curl -X POST http://127.0.0.1:8080/collections/my-vectors/points \
+  -H 'Content-Type: application/json' \
+  -d '{"vectors": [[0.1, 0.2, ...], [0.3, 0.4, ...]]}'
+# -> {"ids": [0, 1]}
+```
+
+### Search
+
+```bash
+curl -X POST http://127.0.0.1:8080/collections/my-vectors/search \
+  -H 'Content-Type: application/json' \
+  -d '{"vector": [0.1, 0.2, ...], "k": 10}'
+# -> {"hits": [{"id": 5, "distance": 0.012}, ...]}
+```
+
+### Save and load
+
+```bash
+# Save a collection to disk
+curl -X POST http://127.0.0.1:8080/collections/my-vectors/save \
+  -d '{"path": "/tmp/my-vectors.vex"}'
+
+# Load a collection from disk into a new name
+curl -X POST http://127.0.0.1:8080/collections/load \
+  -d '{"name": "loaded", "path": "/tmp/my-vectors.vex"}'
+```
+
+Full endpoint list: `GET /health`, `GET /collections`, `POST /collections`,
+`GET/DELETE /collections/:name`, `POST /collections/:name/points`,
+`POST /collections/:name/search`, `POST /collections/:name/save`,
+`POST /collections/load`.
 
 Expected sample output from `cargo run --release --example basic`:
 

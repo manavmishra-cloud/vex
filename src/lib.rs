@@ -40,6 +40,8 @@
 pub mod distance;
 pub mod error;
 pub mod index;
+pub mod server;
+pub mod storage;
 
 pub use distance::Distance;
 pub use error::{Result, VexError};
